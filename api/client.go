@@ -40,13 +40,13 @@ func checkError(resp *http.Response, body []byte) error {
 	return apiError
 }
 
-func ClientFromEnvironment() (*Client, error) {
+func NewClient(uri string) (*Client, error) {
 	defaultPort := "11434"
 
-	scheme, hostport, ok := strings.Cut(os.Getenv("OLLAMA_HOST"), "://")
+	scheme, hostport, ok := strings.Cut(uri, "://")
 	switch {
 	case !ok:
-		scheme, hostport = "http", os.Getenv("OLLAMA_HOST")
+		scheme, hostport = "http", uri
 	case scheme == "http":
 		defaultPort = "80"
 	case scheme == "https":
@@ -90,6 +90,10 @@ func ClientFromEnvironment() (*Client, error) {
 	}
 
 	return &client, nil
+}
+
+func ClientFromEnvironment() (*Client, error) {
+	return NewClient(os.Getenv("OLLAMA_HOST"))
 }
 
 func (c *Client) do(ctx context.Context, method, path string, reqData, respData any) error {
